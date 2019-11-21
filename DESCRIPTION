@@ -1,0 +1,38 @@
+Package: aganalysis
+Title: Statistical analysis interface and tests in AGROFIMS
+Version: 0.0.1
+Authors@R: c( 
+             person("Omar", "Benites", ,"obacc07@example.com", role = c("aut", "cre")),
+             person("Raul", "Eyzaguirre-Perez", , "reyzaguirre@cgiar.org", "aut"),
+             person("Ivan", "Perez-Masias", , "ivanpe834@gmail.com", "aut"),
+             person("Raul", "Arias-Levano", , "r.arias@uni.edu.pe", "aut"),
+             person("Marie-Angelique", "Laporte", , "ma.laporte@cgiar.org", "aut"),
+             person("Medha", "Devare", , "mdevare@cgiar.org", "aut"),
+             person("CIP-RIU", "Research Informatic", , "cip-riu@cgiar.org", role = c("aut"), comment = "Partial copyright holder of the R code"),
+             person("Bioversity International (BI)", role = "cph", comment = "copyright holder of the R code"),
+             person("The International Center for Tropical Agriculture", ,role = "cph", comment = "copyright holder of the R code"),
+             person("International Food Policy Research Institute (IFPRI)", role = "cph", comment = "copyright holder of the R code"),
+             person("International Potato Center (CIP)", role = "cph", comment = "Partial copyright holder of the R code")
+            )
+Description: Implementation of the statistical tests and user interface for the Agronomy Fieldbook Management System (AGROFIMS). It includes
+             single environmental analysis, trend and multi-enviromental analysis. Moreover, it enables the integration with KDSmart as long as
+             the fieldbook file exists; which previosly created in the design tab of AGROFIMS.  in the AGROFIMS repository.
+Imports: readxl,
+         reticulate,
+         tidyr,
+         dplyr,
+         shiny,
+         shinydashboard,
+         magrittr,
+         tibble,
+         stringr,
+         purrr,
+         st4gi,
+         pepa
+Depends: R (>= 3.3.1)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Suggests: 
+    testthat
