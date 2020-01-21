@@ -21,3 +21,16 @@ get_agrofims_file <- function(path = "/home/obenites/AGROFIMS/kdsmart/", file_na
   #   excel_name= "/home/obenites/AGROFIMS/hagrofims/inst/hidap_agrofims/kdx2agro/CRD_rice.xlsx")
   # 
 }
+
+
+get_experiment_name <- function(metadata){
+  
+    datos <- subset(metadata,Parameter=="Experiment name")
+    if(nrow(datos)==0){
+      out <- ""
+    } else {
+      out <- datos$Value
+    }
+    out
+  
+}
