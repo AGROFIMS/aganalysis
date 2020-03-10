@@ -70,22 +70,6 @@ single_hdagrofims_server <- function(input, output, session, values){
     fb <- clean_fb(fb)
     
     })
-    #### FOR TES #####
-    #fb <- readxl::read_excel("/home/obenites/HIDAP_SB_1.0.0/fbanalysis/inst/app_trend/PURI1567089918.xlsx",
-    #                           sheet = "Crop_measurements")
-    #Detect and remove empty columns
-    # isFilled <-purrr::map(.x = fb, function(x) (all(!is.na(x)==TRUE)) )
-    # fb <- fb[,unlist(isFilled)]
-    # #Remove TIMESTAMP columns
-    # fb<- fb[,!stringr::str_detect(names(fb),"TIMESTAMP_")]
-    # #fb <- fb %>% as.data.frame(stringsAsFactors=FALSE)
-    # #Change whitespaces with "_"
-    # names(fb) <-  stringr::str_replace_all(string= names(fb) , pattern =  "[[:space:]]", replacement = "_")
-    # #Change // for "_" to readable traits
-    # names(fb) <- gsub("([//])","_", names(fb))
-    # ### END FOR TEST
-    # print("paso 4")
-    # fb<- fb %>% as.data.frame(stringsAsFactors=FALSE)
     
   })
   
@@ -123,13 +107,37 @@ single_hdagrofims_server <- function(input, output, session, values){
   
   hot_metadata <- reactive({
     
-      inFile <- hot_path_agrofims()
-      if(is.null(inFile)) return(NULL)
-      file.rename(inFile$datapath, paste(inFile$datapath, ".xlsx", sep=""))
-      out<- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),sheet = "Metadata") 
-      out
+      # inFile <- hot_path_agrofims()
+      # if(is.null(inFile)) return(NULL)
+      # file.rename(inFile$datapath, paste(inFile$datapath, ".xlsx", sep=""))
+      # out<- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),sheet = "Metadata") 
+      # out
+    
+    inFile <- hot_path_agrofims()
+    if(is.null(inFile)) return(NULL)
+    fname <- strsplit(inFile$name,split = ",")[[1]][1]
+    #fb <- readxl::read_excel("/home/obenites/AGROFIMS/hagrofims/inst/hidap_agrofims/PURI1567089918.xlsx",
+    fb <- readxl::read_excel(paste0("/home/obenites/AGROFIMS/hagrofims/inst/hidap_agrofims/",fname,".xlsx"),
+                             sheet = "Metadata")
+    
     
   })
+  
+  # hot_experiment_name <- reactive({
+  #   
+  #   inFile <- hot_path_agrofims()
+  #   if(is.null(inFile)) return(NULL)
+  #   file.rename(inFile$datapath, paste(inFile$datapath, ".xlsx", sep=""))
+  #   datos <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),sheet = "Metadata") 
+  #   datos <- subset(datos,Parameter=="Experiment name")
+  #   if(nrow(datos)==0){
+  #     out <- ""
+  #   } else {
+  #     out <- datos$Value
+  #   }
+  #   out
+  #   
+  # })
   
   hot_rep <- reactive({
     if(class(hot_fb_agrofims())=="try-error"){
@@ -241,12 +249,8 @@ single_hdagrofims_server <- function(input, output, session, values){
   output$file_message_single_agrofims <- renderInfoBox({
     
     hot_file <- hot_path_agrofims()
-    #p1 <<- hot_path_agrofims()
     fb_fill <- hot_fb_agrofims()
-    print("-hot file message--")
-    print(fb_fill)
-    print(class(fb_fill))
-    
+  
     if(is.null(hot_file)){
     #if(class(fb_fill())=="try-error"){
       shinydashboard::infoBox(title="Select fieldbook file", subtitle=
@@ -278,24 +282,19 @@ single_hdagrofims_server <- function(input, output, session, values){
       shiny::withProgress(message = "Opening single Report...",value= 0,{
         
         shiny::incProgress(1/5, detail = paste("Downloading Analysis..."))  
-        
-        #
-        #bb1 <<- hot_fbsample_agrofims()
-          
+      
+     
         if(is.null(input$trait_single_agrofims)){
           shinyalert("Oops!", "Select trait(s) to perform analysis", type = "error")
           
         } else {
    
-          #fieldbook <- hot_fb_agrofims() #DEPLOY CODE
+         
           fb <- hot_fbsample_agrofims()
           
           fb <- as.data.frame(fb,stringsAsFactors=FALSE)
           #TEST DATA
-          
-
-          
-        #}
+            #}
           trait <- input$trait_single_agrofims
           rep <- input$rep_single_agrofims
           trt <- input$trt_single_agrofims
@@ -333,6 +332,7 @@ single_hdagrofims_server <- function(input, output, session, values){
             } else{
             
             try(pepa::repo.rcbd(traits = trait,rep = "BLOCK",  trt = trt, trt.lab = "treatment",  format = format, dfr = fb, eu="PLOT",
+                                author = get_experiment_name(hot_metadata()),
                                 server =TRUE, server_dir_name = dirName, server_file_name = servName))
             params <- list(
               dataRequest = "uploadFile",
@@ -353,15 +353,7 @@ single_hdagrofims_server <- function(input, output, session, values){
           }
           
           if(design == "Completely Randomized Design (CRD)"){
-            
-            #if(input$type_single_agrogims=="Subsample"){
-              #trait <- names(fb)[6] #Sith column is for analysis
-              #print(trait)
-              #factors <- c("PLOT", "ROW", "COL", "TREATMENT")
-              #fb <- st4gi::docomp(do = "mean", traits = trait, factors = factors ,dfr=fb)
-              #aa1 <<- fb
-            #}
-            
+        
             #servName =   "crd.docx"
             servName =   "crd"
             
@@ -378,6 +370,7 @@ single_hdagrofims_server <- function(input, output, session, values){
             path <- paste0(dirName, servName, ".docx")
 
             try(pepa::repo.crd(traits = trait, trt = trt, trt.lab = "treatment", format = format, dfr = fb, eu="PLOT",
+                               author =  get_experiment_name(hot_metadata()),
                                server =TRUE, server_dir_name = dirName, server_file_name = servName))
             
             print("paso pepa")
@@ -427,6 +420,7 @@ single_hdagrofims_server <- function(input, output, session, values){
               
               pepa::repo.f(dfr = fb, traits = trait, rep= NULL,
                            factors= factors , format = format, 
+                           author =  get_experiment_name(hot_metadata()),
                            server =TRUE, server_dir_name = dirName, server_file_name = servName )
               
               
@@ -477,6 +471,7 @@ single_hdagrofims_server <- function(input, output, session, values){
               
               pepa::repo.f(dfr = fb, traits = trait, factors= factors,
                            rep = rep, format = format, 
+                           author =  get_experiment_name(hot_metadata()),
                            server =TRUE, server_dir_name = dirName, server_file_name = servName )
               
               
@@ -526,6 +521,7 @@ single_hdagrofims_server <- function(input, output, session, values){
             pepa::repo.spld(dfr = fb, traits = trait, 
                           mpf= mplot,spf=subplot ,sspf=subsubplot,
                           rep = rep, format = format, 
+                          author =  get_experiment_name(hot_metadata()),
                           server =TRUE, server_dir_name = dirName, server_file_name = servName )
             
             
